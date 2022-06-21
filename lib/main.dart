@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:notie/feature/global/create_note_view.dart';
+
+import 'feature/home/home_view.dart';
 
 void main() => runApp(MyApp());
 
@@ -6,16 +9,8 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(
-          title: Text('Notie'),
-        ),
-        body: Center(
-          child: Container(
-            child: Text('Hello World'),
-          ),
-        ),
-      ),
+      debugShowCheckedModeBanner: false,
+      home: HomeView(),
     );
   }
 }
