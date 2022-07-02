@@ -1,8 +1,8 @@
+import 'dart:convert';
 import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:notie/feature/global/create_note_view.dart';
-
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../product/models/note.dart';
 
 class HomeView extends StatefulWidget {
@@ -31,11 +31,12 @@ class _HomeViewState extends State<HomeView> with TickerProviderStateMixin {
     Colors.brown,
   ];
 
-  List<Note> allNotes = [Note("title", "Content", DateTime(2022, 1, 1), 4)];
+  List<Note> allNotes = [];
 
   @override
   void initState() {
     _tabController = TabController(length: 2, vsync: this);
+    _fetchNotes();
     _scrollController.addListener(() {
       if (_scrollController.offset <= 0) {
         isClosedTitle = false;
@@ -232,6 +233,9 @@ class _HomeViewState extends State<HomeView> with TickerProviderStateMixin {
           setState(() {
             allNotes.add(result);
           });
+          var sharedPreferences = await SharedPreferences.getInstance();
+          var newData = allNotes.map((e) => e.toJson()).toList();
+          sharedPreferences.setString("notes", newData.toString());
         }
       },
       child: Icon(Icons.add));
@@ -247,4 +251,18 @@ class _HomeViewState extends State<HomeView> with TickerProviderStateMixin {
               onPressed: () {}, icon: Icon(Icons.search), color: Colors.white)
         ]),
       );
+
+  void _fetchNotes() async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    var comingNotes = sharedPreferences.getString("notes");
+    // await sharedPreferences.clear();
+    if (comingNotes != null) {
+      var currentList = json.decode(comingNotes) as List;
+      var newList = currentList.map((e) => Note.fromMap(e)).toList();
+
+      setState(() {
+        allNotes.addAll(newList);
+      });
+    }
+  }
 }
