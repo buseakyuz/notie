@@ -106,28 +106,26 @@ class _HomeViewState extends State<HomeView> with TickerProviderStateMixin {
     return Container();
   }
 
-  Expanded notesPage() {
-    return Expanded(
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: GridView.builder(
-          itemCount: allNotes.length,
-          itemBuilder: (context, index) {
-            var currentNote = allNotes[index];
-            return singleNote(
-                date:
-                    "${currentNote.date.day}/${currentNote.date.month}/${currentNote.date.year}",
-                title: currentNote.title,
-                content: currentNote.content,
-                colorIndex: currentNote.colorIndex);
-          },
-          controller: _scrollController,
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              childAspectRatio: 0.8,
-              crossAxisCount: 2,
-              mainAxisSpacing: 8,
-              crossAxisSpacing: 8),
-        ),
+  Widget notesPage() {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: GridView.builder(
+        itemCount: allNotes.length,
+        itemBuilder: (context, index) {
+          var currentNote = allNotes[index];
+          return singleNote(
+              date:
+                  "${currentNote.date.day}/${currentNote.date.month}/${currentNote.date.year}",
+              title: currentNote.title,
+              content: currentNote.content,
+              colorIndex: currentNote.colorIndex);
+        },
+        controller: _scrollController,
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            childAspectRatio: 0.8,
+            crossAxisCount: 2,
+            mainAxisSpacing: 8,
+            crossAxisSpacing: 8),
       ),
     );
   }
@@ -264,5 +262,6 @@ class _HomeViewState extends State<HomeView> with TickerProviderStateMixin {
         allNotes.addAll(newList);
       });
     }
+
   }
 }
