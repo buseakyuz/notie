@@ -3,6 +3,9 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:ionicons/ionicons.dart';
 import 'package:notie/product/models/note.dart';
+import 'package:provider/provider.dart';
+
+import '../../product/providers/note_provider.dart';
 
 class CreateNoteView extends StatefulWidget {
   const CreateNoteView({Key? key}) : super(key: key);
@@ -84,7 +87,8 @@ class CreateNoteViewState extends State<CreateNoteView> {
       var newNote = Note(titleController.text, noteController.text,
           DateTime.now(), random.nextInt(9));
       // print("${titleController.text} ${noteController.text} ");
-      Navigator.pop(context, newNote);
+      context.read<NoteProvider>().addNote(newNote);
+      Navigator.pop(context);
     }
   }
 }

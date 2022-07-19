@@ -2,6 +2,8 @@ import 'dart:convert';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:notie/feature/global/create_note_view.dart';
+import 'package:notie/product/providers/note_provider.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../product/models/note.dart';
 
@@ -31,8 +33,6 @@ class _HomeViewState extends State<HomeView> with TickerProviderStateMixin {
     Colors.brown,
   ];
 
-  List<Note> allNotes = [];
-
   @override
   void initState() {
     _tabController = TabController(length: 2, vsync: this);
@@ -40,8 +40,7 @@ class _HomeViewState extends State<HomeView> with TickerProviderStateMixin {
     _scrollController.addListener(() {
       if (_scrollController.offset <= 0) {
         isClosedTitle = false;
-      } else if (_scrollController.offset >=
-          _scrollController.position.maxScrollExtent) {
+      } else if (_scrollController.offset >= _scrollController.position.maxScrollExtent) {
         isClosedTitle = true;
       } else {
         isClosedTitle = _scrollController.offset > lastOffset ? true : false;
@@ -55,8 +54,7 @@ class _HomeViewState extends State<HomeView> with TickerProviderStateMixin {
       lastClosedTitle = isClosedTitle;
       if (_scrollController.offset <= 0) {
         isClosedTitle = false;
-      } else if (_scrollController.offset >=
-          _scrollController.position.maxScrollExtent) {
+      } else if (_scrollController.offset >= _scrollController.position.maxScrollExtent) {
         isClosedTitle = true;
       } else {
         isClosedTitle = _scrollController.offset > lastOffset ? true : false;
@@ -74,6 +72,7 @@ class _HomeViewState extends State<HomeView> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
+    print('Sayfa Oluştuldu');
     return Scaffold(
       appBar: appBar(),
       bottomNavigationBar: _bottomAppBar,
@@ -111,36 +110,27 @@ class _HomeViewState extends State<HomeView> with TickerProviderStateMixin {
       child: Padding(
         padding: const EdgeInsets.all(8.0),
         child: GridView.builder(
-          itemCount: allNotes.length,
+          itemCount: context.watch<NoteProvider>().allNotes.length,
           itemBuilder: (context, index) {
-            var currentNote = allNotes[index];
+            var currentNote = context.read<NoteProvider>().allNotes[index];
             return singleNote(
-                date:
-                    "${currentNote.date.day}/${currentNote.date.month}/${currentNote.date.year}",
+                date: "${currentNote.date.day}/${currentNote.date.month}/${currentNote.date.year}",
                 title: currentNote.title,
                 content: currentNote.content,
                 colorIndex: currentNote.colorIndex);
           },
           controller: _scrollController,
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              childAspectRatio: 0.8,
-              crossAxisCount: 2,
-              mainAxisSpacing: 8,
-              crossAxisSpacing: 8),
+              childAspectRatio: 0.8, crossAxisCount: 2, mainAxisSpacing: 8, crossAxisSpacing: 8),
         ),
       ),
     );
   }
 
-  Card singleNote(
-      {required String date,
-      required String title,
-      required String content,
-      required int colorIndex}) {
+  Card singleNote({required String date, required String title, required String content, required int colorIndex}) {
     return Card(
       clipBehavior: Clip.antiAlias,
-      shape: BeveledRectangleBorder(
-          borderRadius: BorderRadius.only(topRight: Radius.circular(45))),
+      shape: BeveledRectangleBorder(borderRadius: BorderRadius.only(topRight: Radius.circular(45))),
       child: Container(
         decoration: BoxDecoration(
           color: notePageColors[colorIndex],
@@ -160,10 +150,7 @@ class _HomeViewState extends State<HomeView> with TickerProviderStateMixin {
               SizedBox(height: 8.0),
               Text(
                 title,
-                style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w900,
-                    fontSize: 16.0),
+                style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 16.0),
               ),
               SizedBox(height: 8.0),
               Text(
@@ -184,31 +171,21 @@ class _HomeViewState extends State<HomeView> with TickerProviderStateMixin {
     return AnimatedContainer(
       duration: Duration(milliseconds: 300),
       height: isClosedTitle ? 0 : null,
-      decoration: BoxDecoration(
-          color: Color.fromARGB(255, 156, 137, 184),
-          borderRadius: BorderRadius.circular(40)),
+      decoration: BoxDecoration(color: Color.fromARGB(255, 156, 137, 184), borderRadius: BorderRadius.circular(40)),
       child: DefaultTabController(
         length: 2,
         child: TabBar(
           controller: _tabController,
           isScrollable: true,
           labelPadding: EdgeInsets.symmetric(horizontal: 32),
-          indicator: BoxDecoration(
-              borderRadius: BorderRadius.circular(40),
-              color: Colors.pinkAccent.withOpacity(0.8)),
+          indicator: BoxDecoration(borderRadius: BorderRadius.circular(40), color: Colors.pinkAccent.withOpacity(0.8)),
           tabs: [
             Tab(
                 child: Text("All Notes",
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 20,
-                        fontWeight: FontWeight.w600))),
+                    style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w600))),
             Tab(
-                child: Text("Folders",
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 20,
-                        fontWeight: FontWeight.w600)))
+                child:
+                    Text("Folders", style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w600)))
           ],
         ),
       ),
@@ -227,16 +204,7 @@ class _HomeViewState extends State<HomeView> with TickerProviderStateMixin {
       mini: false,
       backgroundColor: Color.fromARGB(255, 156, 137, 184),
       onPressed: () async {
-        var result = await Navigator.push(
-            context, MaterialPageRoute(builder: (context) => CreateNoteView()));
-        if (result != null) {
-          setState(() {
-            allNotes.add(result);
-          });
-          var sharedPreferences = await SharedPreferences.getInstance();
-          var newData = allNotes.map((e) => e.toJson()).toList();
-          sharedPreferences.setString("notes", newData.toString());
-        }
+        Navigator.push(context, MaterialPageRoute(builder: (context) => const CreateNoteView()));
       },
       child: Icon(Icons.add));
 
@@ -245,24 +213,12 @@ class _HomeViewState extends State<HomeView> with TickerProviderStateMixin {
         shape: CircularNotchedRectangle(),
         color: Color.fromARGB(255, 156, 137, 184),
         child: Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
-          IconButton(
-              onPressed: () {}, icon: Icon(Icons.home), color: Colors.white),
-          IconButton(
-              onPressed: () {}, icon: Icon(Icons.search), color: Colors.white)
+          IconButton(onPressed: () {}, icon: Icon(Icons.home), color: Colors.white),
+          IconButton(onPressed: () {}, icon: Icon(Icons.search), color: Colors.white)
         ]),
       );
 
   void _fetchNotes() async {
-    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-    var comingNotes = sharedPreferences.getString("notes");
-    // await sharedPreferences.clear();
-    if (comingNotes != null) {
-      var currentList = json.decode(comingNotes) as List;
-      var newList = currentList.map((e) => Note.fromMap(e)).toList();
-
-      setState(() {
-        allNotes.addAll(newList);
-      });
-    }
+    context.read<NoteProvider>().fetchNotes();
   }
 }
